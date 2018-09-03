@@ -85,6 +85,13 @@ var UIController = (function() {
               
         },
 
+        clearInput : function() {
+            document.querySelector(uiMarkup.descriptionBox).value = '';
+            document.querySelector(uiMarkup.valueBox).value = '';
+
+            document.querySelector(uiMarkup.descriptionBox).focus();
+        },
+
         addListItem : function(obj, type) {
             var html,newHtml,element;
 
@@ -157,6 +164,8 @@ var appController = (function(budgetCtrl,UICtrl) {
             var newItem = budgetCtrl.addItem(input.inputType,input.description,input.value);
 
             UICtrl.addListItem(newItem,input.inputType);
+
+            UICtrl.clearInput();
         }
         // 3. Add a new item to the user interface
 

@@ -163,6 +163,10 @@ var UIController = (function() {
 
             document.querySelector(element).insertAdjacentHTML('beforeend',newHtml);
         },
+
+        deleteListItem : function(selectorId) {
+            document.getElementById(selectorId).parentNode.removeChild(document.getElementById(selectorId));
+        },
         
         changeInputColor : function(type) {
             var fields = document.querySelectorAll(uiMarkup.descriptionBox + ', ' + uiMarkup.valueBox + ', ' + uiMarkup.inputType + ', ' + uiMarkup.addInputButton);
@@ -257,6 +261,8 @@ var appController = (function(budgetCtrl,UICtrl) {
             
 
             budgetCtrl.deleteItem(type,parseInt(id));
+            UICtrl.deleteListItem(itemId);
+            calculateBudget();
         }
     }
 

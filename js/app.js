@@ -137,6 +137,24 @@ var UIController = (function() {
         expenseList : '.expenses__list',
         itemPercentage : '.item__percentage'
     };
+
+    var formatNumber = function(num, type) {
+        var numArr,int, dec, sign;
+        num = Math.abs(num);
+        num = num.toFixed(2);
+
+        numArr = num.split('.');
+        int = numArr[0];
+
+        if(int.length > 3) {
+            //2,314
+            int = int.substring(0 , int.length -3) + ',' + int.substring(int.length-3,int.length);
+        }
+        dec = numArr[1];
+
+        type === 'exp' ? sign = '-' : sign = '+';
+        return sign + ' ' + int + '.' + dec;
+    }
    
     
     return {
@@ -163,9 +181,11 @@ var UIController = (function() {
         },
 
         displayBudget : function(budget) {
-            document.querySelector(uiMarkup.incomeValue).textContent = budget.totals.inc;
-            document.querySelector(uiMarkup.expenseValue).textContent = budget.totals.exp;
-            document.querySelector(uiMarkup.budgetValue).textContent = budget.budget;
+            var type;
+            budget.budget > 0 ? type = 'inc' : type = 'exp';
+            document.querySelector(uiMarkup.incomeValue).textContent =formatNumber(budget.totals.inc,'inc');
+            document.querySelector(uiMarkup.expenseValue).textContent = formatNumber(budget.totals.exp,'exp');
+            document.querySelector(uiMarkup.budgetValue).textContent = formatNumber(budget.budget,type);
 
             if(budget.percentage > 0) {
                 document.querySelector(uiMarkup.expensePercentage).textContent = budget.percentage + '%';
@@ -201,11 +221,13 @@ var UIController = (function() {
             }
             newHtml = html.replace('%id%',obj.id);
             newHtml = newHtml.replace('%description%',obj.description);
-            newHtml = newHtml.replace('%value%',obj.value);
+            newHtml = newHtml.replace('%value%',formatNumber(obj.value,type));
             
 
             document.querySelector(element).insertAdjacentHTML('beforeend',newHtml);
         },
+
+        
 
         deleteListItem : function(selectorId) {
             document.getElementById(selectorId).parentNode.removeChild(document.getElementById(selectorId));

@@ -113,13 +113,13 @@ var UIController = (function() {
         },
 
         clearInput : function() {
-            var inputArray = Array.prototype.slice.call(document.querySelectorAll(uiMarkup.descriptionBox + ', ' + uiMarkup.budgetValue));
+            var inputArray = Array.prototype.slice.call(document.querySelectorAll(uiMarkup.descriptionBox + ', ' + uiMarkup.valueBox));
 
             inputArray.forEach(function(item) {
                 item.value = '';
             });
 
-            document.querySelector(uiMarkup.descriptionBox).focus();
+            inputArray[0].focus();
         },
 
         addListItem : function(obj, type) {

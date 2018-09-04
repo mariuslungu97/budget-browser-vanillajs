@@ -1,8 +1,4 @@
-// var currentAppState = {
-//     incomeList : [],
-//     expenseList : [],
-//     total : 0
-// }
+
 
 var budgetController = (function() {
     
@@ -18,6 +14,13 @@ var budgetController = (function() {
         this.value = value;
     }
 
+    var calculateTotal = function(type) {
+        var sum = 0;
+        data.allItems[type].forEach(function(current) {
+            sum += current.value;
+        })
+        data.totals[type] = sum;
+    }
     var data = {
         allItems : {
             inc : [],
@@ -26,7 +29,9 @@ var budgetController = (function() {
         totals : {
             inc : 0,
             exp : 0
-        }
+        },
+        budget : 0,
+        percentage : -1
     }
 
     return {
@@ -47,6 +52,28 @@ var budgetController = (function() {
             data.allItems[type].push(newItem);
 
             return newItem;
+        },
+
+        calculateBudget : function() {
+            calculateTotal('inc');
+            calculateTotal('exp');
+
+            data.budget = data.totals.inc - data.totals.exp;
+
+            if(data.totals.inc > 0) data.percentage = Math.round((data.totals.exp / data.totals.inc) * 100);
+            else data.percentage = -1;
+        },
+
+        getBudget : function() {
+            return {
+                totals : {
+                    inc : data.totals.inc,
+                    exp : data.totals.exp,
+
+                },
+                budget : data.budget,
+                percentage : data.percentage
+            }
         },
 
         testing : function() {
@@ -79,15 +106,18 @@ var UIController = (function() {
         getInput : function() {
             return {
                  description : document.querySelector(uiMarkup.descriptionBox).value,
-                 value : document.querySelector(uiMarkup.valueBox).value,
+                 value : parseFloat(document.querySelector(uiMarkup.valueBox).value),
                  inputType : document.querySelector(uiMarkup.inputType).value
             }
               
         },
 
         clearInput : function() {
-            document.querySelector(uiMarkup.descriptionBox).value = '';
-            document.querySelector(uiMarkup.valueBox).value = '';
+            var inputArray = Array.prototype.slice.call(document.querySelectorAll(uiMarkup.descriptionBox + ', ' + uiMarkup.budgetValue));
+
+            inputArray.forEach(function(item) {
+                item.value = '';
+            });
 
             document.querySelector(uiMarkup.descriptionBox).focus();
         },
@@ -110,16 +140,18 @@ var UIController = (function() {
         },
         
         changeInputColor : function(type) {
+            var fields = document.querySelectorAll(uiMarkup.descriptionBox + ', ' + uiMarkup.valueBox + ', ' + uiMarkup.inputType + ', ' + uiMarkup.addInputButton);
+            var fieldsArr = Array.prototype.slice.call(fields);
             if(type === 'exp') {
-                document.querySelector(uiMarkup.descriptionBox).classList.add(uiMarkup.redFocus);
-                document.querySelector(uiMarkup.valueBox).classList.add(uiMarkup.redFocus);
-                document.querySelector(uiMarkup.inputType).classList.add(uiMarkup.redFocus);
-                document.querySelector(uiMarkup.addInputButton).style.color = '#FF5049';
+                fieldsArr.forEach(function(current) {
+                    current.classList.add(uiMarkup.redFocus);
+                    fieldsArr[3].style.color = '#FF5049';
+                });
             } else if(type === 'inc') {
-                document.querySelector(uiMarkup.descriptionBox).classList.remove(uiMarkup.redFocus);
-                document.querySelector(uiMarkup.valueBox).classList.remove(uiMarkup.redFocus);
-                document.querySelector(uiMarkup.inputType).classList.remove(uiMarkup.redFocus);
-                document.querySelector(uiMarkup.addInputButton).style.color = '#28B9B5';
+                fieldsArr.forEach(function(current) {
+                    current.classList.remove(uiMarkup.redFocus);
+                    fieldsArr[3].style.color = '#28B9B5';
+                });
             }
         }
         
@@ -156,26 +188,30 @@ var appController = (function(budgetCtrl,UICtrl) {
         });
     }
    
+    var calculateBudget = function() {
+        // 6. Calculate and update the budget
+        budgetController.calculateBudget();
+        // 7. Return the budget
+        var budgets = budgetController.getBudget();
+        console.log(budgets);
+        // 7. Display the budget
+
+    };
+    
     var ctrlAddItem = function() {
         // 1. Get Input
         var input = UICtrl.getInput();
-        // 2. Read the input, check if the inputs has values and add the item to the budget controller
-        if(input.description && input.value) {
+        // 2. Read the input, check if the inputs has values
+        if(input.description && input.value && input.value > 0) {
+            // 3. add the item to the budget controller
             var newItem = budgetCtrl.addItem(input.inputType,input.description,input.value);
-
+            // 4. Add a new item to the user interface
             UICtrl.addListItem(newItem,input.inputType);
-
+            // 5. Clear Input for the next input     
             UICtrl.clearInput();
-        }
-        // 3. Add a new item to the user interface
-
-        // 3. Calculate and update the budget
-
-        // 4. Display the budget
-
-        // 5. Clear Input for the next input     
-        
-        
+            
+            calculateBudget();
+        }     
     };
 
     return {
